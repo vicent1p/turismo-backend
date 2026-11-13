@@ -254,7 +254,7 @@ export class HotelesService {
       records = await this.repo.findMany({
         where,
         include: ESTABLECIMIENTO_INCLUDE,
-        orderBy: [{ creadoEn: 'asc' }, { nombre: 'asc' }],
+        orderBy: [{ creadoEn: 'desc' }, { id: 'desc' }],
       });
     } catch {
       return this.getFallbackHoteles();
