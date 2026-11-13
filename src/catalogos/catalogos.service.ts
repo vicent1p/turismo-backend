@@ -24,7 +24,7 @@ export class CatalogosService {
       const estPromise = this.estRepo?.findMany
         ? this.estRepo.findMany({
             where: { eliminadoEn: null },
-            select: { municipioCodigo: true, municipioId: true } as any,
+            select: { municipioCodigo: true },
           })
         : Promise.resolve([]);
 
@@ -85,7 +85,6 @@ export class CatalogosService {
             { municipioCodigo: municipio.id },
             ...(municipio.codigo ? [{ municipioCodigo: municipio.codigo }] : []),
             { municipioCodigo: municipio.nombre },
-            { municipioId: municipio.id } as any,
           ],
         },
       });
