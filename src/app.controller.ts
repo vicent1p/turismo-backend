@@ -11,8 +11,8 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  /** GET /api/health — Unthrottled liveness + database readiness check. */
-  @Get('api/health')
+  /** GET /health and /api/health — Unthrottled liveness + database readiness check. */
+  @Get(['health', 'api/health'])
   @SkipThrottle()
   async getHealth(): Promise<HealthStatusDto> {
     return this.appService.checkHealth();

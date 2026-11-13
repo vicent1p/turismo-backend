@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
+import { getTypeOrmConfig } from './config/typeorm.config';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -35,9 +36,43 @@ describe('AppController', () => {
       expect(typeof health.timestamp).toBe('string');
     });
 
-    it('should throw 503 ServiceUnavailableException when PostgreSQL fails', async () => {
+    it('should throw 503 ServiceUnavailableException with Spanish message when PostgreSQL fails', async () => {
       mockPrisma.$queryRaw.mockRejectedValueOnce(new Error('ECONNREFUSED'));
-      await expect(appController.getHealth()).rejects.toThrow(ServiceUnavailableException);
+      await expect(appController.getHealth()).rejects.toThrow(
+        new ServiceUnavailableException(
+          'El servicio está en ejecución, pero no fue posible conectar con la base de datos.',
+        ),
+      );
+    });
+
+    it('should throw 503 ServiceUnavailableException when query times out (> 3000ms)', async () => {
+      jest.useFakeTimers();
+      // Promise that never resolves immediately
+      mockPrisma.$queryRaw.mockImplementationOnce(
+        () => new Promise((resolve) => setTimeout(resolve, 10000)),
+      );
+
+      const healthPromise = appController.getHealth();
+      jest.advanceTimersByTime(3100);
+
+      await expect(healthPromise).rejects.toThrow(
+        new ServiceUnavailableException(
+          'El servicio está en ejecución, pero no fue posible conectar con la base de datos.',
+        ),
+      );
+      jest.useRealTimers();
+    });
+  });
+
+  describe('getTypeOrmConfig', () => {
+    it('should configure connection pool defaults and slow query threshold', () => {
+      const config = getTypeOrmConfig();
+      expect(config.type).toBe('postgres');
+      expect(config.extra.max).toBe(20);
+      expect(config.extra.min).toBe(2);
+      expect(config.extra.connectionTimeoutMillis).toBe(5000);
+      expect(config.extra.idleTimeoutMillis).toBe(30000);
+      expect(config.maxQueryExecutionTime).toBe(1000);
     });
   });
 });
