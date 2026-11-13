@@ -90,3 +90,4 @@ describe('LogWriterService', () => {
     expect(existsSync(recentDir)).toBe(true);
   });
 });
+

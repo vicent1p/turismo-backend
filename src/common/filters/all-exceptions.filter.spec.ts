@@ -99,3 +99,4 @@ describe('AllExceptionsFilter', () => {
     expect(logWriterMock.writeErrorLog).toHaveBeenCalled();
   });
 });
+

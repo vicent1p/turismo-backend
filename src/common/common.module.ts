@@ -14,3 +14,4 @@ import { AllExceptionsFilter } from './filters/all-exceptions.filter';
   exports: [LogWriterService],
 })
 export class CommonModule {}
+

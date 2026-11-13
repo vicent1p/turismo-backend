@@ -119,3 +119,4 @@ export class LogWriterService {
     return removedCount;
   }
 }
+
