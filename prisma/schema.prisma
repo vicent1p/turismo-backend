@@ -1,0 +1,210 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Rol {
+  ADMIN
+  GESTOR
+}
+
+enum TipoTarjeta {
+  HOTEL
+  CABANA
+  RESTAURANTE
+}
+
+enum PlataformaRedSocial {
+  Instagram
+  Facebook
+  TikTok
+  X
+  YouTube
+}
+
+enum TipoPregunta {
+  opcion
+  texto
+  calificacion
+}
+
+model Usuario {
+  id                  Int               @id @default(autoincrement())
+  correo              String            @unique
+  nombreCompleto      String
+  passwordHash        String
+  rol                 Rol               @default(GESTOR)
+  activo              Boolean           @default(true)
+  debeCambiarPassword Boolean           @default(false)
+  ultimoAcceso        DateTime?
+  eliminadoEn         DateTime?
+  creadoEn            DateTime          @default(now())
+  actualizadoEn       DateTime          @updatedAt
+
+  establecimientos    Establecimiento[] @relation("UsuarioEstablecimientos")
+
+  @@map("usuarios")
+}
+
+model Establecimiento {
+  id               Int                      @id @default(autoincrement())
+  tipo             TipoTarjeta              @default(HOTEL)
+  nombre           String
+  municipioCodigo  String                   @default("47001")
+  estrellas        Int                      @default(3)
+  resena           String?
+  resenaEn         String?
+  whatsapp         String?
+  telefonoContacto String?
+  instagramUrl     String?
+  facebookUrl      String?
+  xUrl             String?
+  direccion        String?
+  ubicacionUrl     String?
+  latitud          Float?
+  longitud         Float?
+  disponible       Boolean                  @default(true)
+  eliminadoEn      DateTime?
+  creadoEn         DateTime                 @default(now())
+  actualizadoEn    DateTime                 @updatedAt
+
+  usuarioId        Int?
+  creadoPor        Usuario?                 @relation("UsuarioEstablecimientos", fields: [usuarioId], references: [id])
+
+  redesSociales    RedSocial[]
+  fotos            EstablecimientoFoto[]
+  servicios        EstablecimientoServicio[]
+
+  @@map("establecimientos")
+}
+
+model RedSocial {
+  id                Int                 @id @default(autoincrement())
+  establecimientoId Int
+  plataforma        PlataformaRedSocial
+  url               String
+  activo            Boolean             @default(true)
+  creadoEn          DateTime            @default(now())
+  actualizadoEn     DateTime            @updatedAt
+
+  establecimiento   Establecimiento     @relation(fields: [establecimientoId], references: [id], onDelete: Cascade)
+
+  @@map("redes_sociales")
+}
+
+model EstablecimientoFoto {
+  id                Int             @id @default(autoincrement())
+  establecimientoId Int
+  url               String
+  orden             Int             @default(0)
+  esPortada         Boolean         @default(false)
+
+  establecimiento   Establecimiento @relation(fields: [establecimientoId], references: [id], onDelete: Cascade)
+
+  @@map("establecimiento_fotos")
+}
+
+model Servicio {
+  id               Int                      @id @default(autoincrement())
+  nombre           String                   @unique
+  nombreEn         String?
+  icono            String?
+  tipo             TipoTarjeta?
+
+  establecimientos EstablecimientoServicio[]
+
+  @@map("servicios")
+}
+
+model EstablecimientoServicio {
+  establecimientoId Int
+  servicioId        Int
+
+  establecimiento   Establecimiento @relation(fields: [establecimientoId], references: [id], onDelete: Cascade)
+  servicio          Servicio        @relation(fields: [servicioId], references: [id], onDelete: Cascade)
+
+  @@id([establecimientoId, servicioId])
+  @@map("establecimiento_servicios")
+}
+
+model Municipio {
+  id           String   @id @default(uuid())
+  codigo       String?  @unique
+  nombre       String   @unique
+  ciudad       String?
+  departamento String   @default("Magdalena")
+
+  @@map("municipios")
+}
+
+model Encuesta {
+  id               Int                 @id @default(autoincrement())
+  titulo           String
+  descripcion      String?
+  activa           Boolean             @default(true)
+  mostrarEnLanding Boolean             @default(false)
+  creadoEn         DateTime            @default(now())
+  actualizadoEn    DateTime            @updatedAt
+
+  preguntas        Pregunta[]
+  respuestas       RespuestaEncuesta[]
+
+  @@map("encuestas")
+}
+
+model Pregunta {
+  id                Int                 @id @default(autoincrement())
+  encuestaId        Int
+  pregunta          String
+  tipoPregunta      TipoPregunta        @default(opcion)
+  obligatoria       Boolean             @default(true)
+  orden             Int                 @default(0)
+
+  encuesta          Encuesta            @relation(fields: [encuestaId], references: [id], onDelete: Cascade)
+  opciones          OpcionPregunta[]
+  detalleRespuestas DetalleRespuesta[]
+
+  @@map("preguntas")
+}
+
+model OpcionPregunta {
+  id                Int                @id @default(autoincrement())
+  preguntaId        Int
+  texto             String
+  orden             Int                @default(0)
+
+  pregunta          Pregunta           @relation(fields: [preguntaId], references: [id], onDelete: Cascade)
+  detalleRespuestas DetalleRespuesta[]
+
+  @@map("opciones_pregunta")
+}
+
+model RespuestaEncuesta {
+  id             Int                @id @default(autoincrement())
+  encuestaId     Int
+  fechaRespuesta DateTime           @default(now())
+  creadoEn       DateTime           @default(now())
+
+  encuesta       Encuesta           @relation(fields: [encuestaId], references: [id], onDelete: Cascade)
+  detalles       DetalleRespuesta[]
+
+  @@map("respuestas_encuesta")
+}
+
+model DetalleRespuesta {
+  id                  Int                @id @default(autoincrement())
+  respuestaEncuestaId Int
+  preguntaId          Int
+  opcionId            Int?
+  respuestaTexto      String?
+
+  respuestaEncuesta   RespuestaEncuesta  @relation(fields: [respuestaEncuestaId], references: [id], onDelete: Cascade)
+  pregunta            Pregunta           @relation(fields: [preguntaId], references: [id], onDelete: Cascade)
+  opcion              OpcionPregunta?    @relation(fields: [opcionId], references: [id], onDelete: SetNull)
+
+  @@map("detalle_respuestas")
+}
