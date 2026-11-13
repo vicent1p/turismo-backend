@@ -30,16 +30,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const parsedId = Number(payload.sub);
     const userId = !isNaN(parsedId) ? parsedId : 1;
 
-    const user = await this.prisma.usuario.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        correo: true,
-        rol: true,
-        nombreCompleto: true,
-        activo: true,
-      },
-    });
+    let user;
+    try {
+      user = await this.prisma.usuario.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          correo: true,
+          rol: true,
+          nombreCompleto: true,
+          activo: true,
+        },
+      });
+    } catch {
+      return {
+        id: userId,
+        correo: payload.correo,
+        rol: payload.rol,
+        nombreCompleto: payload.nombreCompleto || payload.correo,
+      };
+    }
 
     if (!user || !user.activo) {
       throw new UnauthorizedException('Sesión revocada o usuario inactivo');
