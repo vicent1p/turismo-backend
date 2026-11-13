@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Rol } from '@prisma/client';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/current-user.decorator';
@@ -29,12 +30,14 @@ export class HotelesController {
 
   /** GET /api/hoteles or /api/establecimientos — Public catalog. */
   @Get()
+  @SkipThrottle()
   async findAll(@Query() query: QueryHotelsDto): Promise<SerializedHotel[]> {
     return this.hotelesService.findAll(query);
   }
 
   /** GET /api/hoteles/:id or /api/establecimientos/:id — Public single card detail. */
   @Get(':id')
+  @SkipThrottle()
   async findOne(@Param('id') id: string): Promise<SerializedHotel> {
     return this.hotelesService.findOne(id);
   }

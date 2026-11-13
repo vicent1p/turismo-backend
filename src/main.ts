@@ -22,6 +22,8 @@ async function bootstrap() {
   loadLocalEnv();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  app.getHttpAdapter().getInstance().set('trust proxy', Number(process.env.TRUST_PROXY_HOPS ?? 1));
+
   app.use(
     helmet({
       // Allow cross-origin image rendering when frontend runs on a separate domain/port.

@@ -1,4 +1,5 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Rol } from '@prisma/client';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -14,6 +15,7 @@ import { ListasResponseDto } from './dto/listas.dto';
 @Controller(['dashboard', 'api/dashboard'])
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Rol.ADMIN, Rol.GESTOR)
+@SkipThrottle()
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

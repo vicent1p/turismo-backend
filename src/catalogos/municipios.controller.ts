@@ -8,6 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Rol } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -21,12 +22,14 @@ export class MunicipiosController {
 
   /** GET /api/municipios — Public directory of Magdalena municipalities. */
   @Get()
+  @SkipThrottle()
   async findAll() {
     return this.catalogosService.findAllMunicipios();
   }
 
   /** GET /api/municipios/:id — Single municipality details. */
   @Get(':id')
+  @SkipThrottle()
   async findOne(@Param('id') id: string) {
     return this.catalogosService.findOneMunicipio(id);
   }

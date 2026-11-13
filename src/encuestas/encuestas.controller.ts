@@ -9,6 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { Rol } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -29,6 +30,7 @@ export class EncuestasController {
    * Public: returns active survey configured for the public landing page.
    */
   @Get('landing/activa')
+  @SkipThrottle()
   async findLandingActiva() {
     return this.encuestasService.findLandingActiva();
   }
@@ -38,6 +40,7 @@ export class EncuestasController {
    * Public: receives responses from visitors/tourists.
    */
   @Post(':id/respuestas')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async responder(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ResponderEncuestaDto,
@@ -50,6 +53,7 @@ export class EncuestasController {
    * Gestor/Admin: lists all surveys.
    */
   @Get()
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Rol.ADMIN, Rol.GESTOR)
   async findAll() {
@@ -61,6 +65,7 @@ export class EncuestasController {
    * Gestor/Admin: views response statistics and aggregated metrics.
    */
   @Get(':id/resultados')
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Rol.ADMIN, Rol.GESTOR)
   async obtenerResultados(@Param('id', ParseIntPipe) id: number) {
@@ -72,6 +77,7 @@ export class EncuestasController {
    * Gestor/Admin: full survey detail for editing.
    */
   @Get(':id')
+  @SkipThrottle()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Rol.ADMIN, Rol.GESTOR)
   async findOne(@Param('id', ParseIntPipe) id: number) {

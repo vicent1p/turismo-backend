@@ -14,13 +14,16 @@ import { EncuestasModule } from './encuestas/encuestas.module';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([
-      {
-        name: 'default',
-        ttl: 60_000,
-        limit: 120,
-      },
-    ]),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'default',
+          ttl: 60_000,
+          limit: 120,
+        },
+      ],
+      errorMessage: 'Demasiadas solicitudes. Por favor, inténtalo de nuevo más tarde.',
+    }),
     PrismaModule,
     AuthModule,
     DashboardModule,

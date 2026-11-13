@@ -7,6 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Rol } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -20,6 +21,7 @@ export class ServiciosController {
 
   /** GET /api/servicios — Public list of amenities/services. */
   @Get()
+  @SkipThrottle()
   async findAll() {
     return this.catalogosService.findAllServicios();
   }
