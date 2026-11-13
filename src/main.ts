@@ -37,21 +37,30 @@ async function bootstrap() {
     maxAge: '7d',
   });
 
-  const allowedOrigins = process.env.CORS_ORIGINS
-    ?.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  app.enableCors({
-    origin: allowedOrigins && allowedOrigins.length > 0 ? allowedOrigins : true,
-    credentials: true,
-  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
     }),
   );
+
+  const originsEnv = process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGINS;
+  const allowedOrigins = originsEnv
+    ? originsEnv.split(',').map((origin) => origin.trim())
+    : ['http://localhost:4200'];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
