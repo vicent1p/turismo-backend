@@ -49,15 +49,36 @@ async function bootstrap() {
   const originsEnv = process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGINS;
   const allowedOrigins = originsEnv
     ? originsEnv.split(',').map((origin) => origin.trim())
-    : ['http://localhost:4200'];
+    : [
+        'http://localhost:4200',
+        'http://localhost:4201',
+        'https://proturismo.magdalena.gov.co',
+        'http://proturismo.magdalena.gov.co',
+      ];
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes('*')
+      ) {
         callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+        return;
       }
+      try {
+        const url = new URL(origin);
+        if (
+          url.hostname === 'proturismo.magdalena.gov.co' ||
+          url.hostname.endsWith('.magdalena.gov.co') ||
+          url.hostname === 'localhost' ||
+          url.hostname === '127.0.0.1'
+        ) {
+          callback(null, true);
+          return;
+        }
+      } catch {}
+      callback(new Error('Not allowed by CORS'));
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
