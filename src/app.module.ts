@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CommonModule } from './common/common.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -14,6 +16,7 @@ import { EncuestasModule } from './encuestas/encuestas.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -24,6 +27,7 @@ import { EncuestasModule } from './encuestas/encuestas.module';
       ],
       errorMessage: 'Demasiadas solicitudes. Por favor, inténtalo de nuevo más tarde.',
     }),
+    CommonModule,
     PrismaModule,
     AuthModule,
     DashboardModule,
