@@ -203,6 +203,7 @@ export class DashboardService {
         },
         select: {
           id: true,
+          tipo: true,
           nombre: true,
           municipioCodigo: true,
           estrellas: true,
@@ -216,6 +217,7 @@ export class DashboardService {
       return establecimientos.map((h: any) => ({
         id: String(h.id),
         nombre: h.nombre,
+        tipo: String(h.tipo || 'hotel').toLowerCase(),
         estrellas: h.estrellas,
         municipio: h.municipioCodigo || h.municipio?.nombre || 'Plato',
         whatsapp: h.whatsapp,
@@ -228,6 +230,7 @@ export class DashboardService {
         {
           id: '1',
           nombre: 'Hotel Cabañas del Río',
+          tipo: 'hotel',
           estrellas: 4,
           municipio: 'Plato',
           whatsapp: '+57 300 123 4567',
@@ -238,6 +241,7 @@ export class DashboardService {
         {
           id: '2',
           nombre: 'Cabaña Campestre Los Samanes',
+          tipo: 'cabana',
           estrellas: 3,
           municipio: 'Plato',
           whatsapp: '+57 311 987 6543',
@@ -248,6 +252,7 @@ export class DashboardService {
         {
           id: '3',
           nombre: 'Restaurante Bar El Muelle del Río',
+          tipo: 'restaurante',
           estrellas: 4,
           municipio: 'Plato',
           whatsapp: '+57 320 555 1234',
