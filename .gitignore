@@ -4,8 +4,9 @@ node_modules/
 # Production build output
 dist/
 
-# Uploads and media
-uploads/
+# Uploads and media (solo la carpeta de archivos subidos en la raíz, nunca el código fuente src/uploads)
+/uploads/
+!src/uploads/
 
 # Environment variables (credentials and secrets)
 .env
