@@ -12,9 +12,30 @@ function loadLocalEnv(): void {
   if (typeof proc.loadEnvFile === 'function' && existsSync('.env')) {
     try {
       proc.loadEnvFile('.env');
+      return;
     } catch {
       // Ignore if environment is already injected externally
     }
+  }
+
+  if (existsSync('.env')) {
+    try {
+      const fs = require('node:fs');
+      const lines: string[] = fs.readFileSync('.env', 'utf8').split(/\r?\n/);
+      for (const line of lines) {
+        const match = line.match(/^\s*([\w_]+)\s*=\s*(.*)?\s*$/);
+        if (match && !process.env[match[1]]) {
+          let val = match[2] ? match[2].trim() : '';
+          if (
+            (val.startsWith('"') && val.endsWith('"')) ||
+            (val.startsWith("'") && val.endsWith("'"))
+          ) {
+            val = val.slice(1, -1);
+          }
+          process.env[match[1]] = val;
+        }
+      }
+    } catch {}
   }
 }
 
